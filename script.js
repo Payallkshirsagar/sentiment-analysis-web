@@ -2,58 +2,29 @@
 async function analyzeText() {
     const text = document.getElementById('textInput').value;
     if (!text) {
-        alert('Please enter some text to analyze');
+        showError('textResult', 'Please enter some text to analyze');
         return;
     }
 
     try {
-        const response = await fetch('/analyze-text', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text }),
-        });
-
-        const data = await response.json();
-        const resultDiv = document.getElementById('textResult');
+        // Simple sentiment analysis using TextBlob.js
+        const blob = new TextBlob(text);
+        const polarity = blob.sentiment.polarity;
+        const subjectivity = blob.sentiment.subjectivity;
         
-        if (data.error) {
-            resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
-            return;
-        }
-
-        const emotions = data.emotions;
-        const polarity = data.polarity;
-        const subjectivity = data.subjectivity;
-
-        // Create emotion bars
-        const emotionBars = Object.entries(emotions)
-            .map(([emotion, value]) => `
-                <div class="emotion-bar">
-                    <span class="emotion-label">${emotion}:</span>
-                    <div class="bar-container">
-                        <div class="bar" style="width: ${value * 100}%"></div>
-                    </div>
-                    <span class="emotion-value">${(value * 100).toFixed(1)}%</span>
-                </div>
-            `).join('');
-
-        resultDiv.innerHTML = `
-            <div class="result-container">
-                <h4>Analysis Results:</h4>
-                <div class="sentiment-info">
-                    <p>Polarity: ${polarity.toFixed(2)} (${getPolarityLabel(polarity)})</p>
-                    <p>Subjectivity: ${subjectivity.toFixed(2)} (${getSubjectivityLabel(subjectivity)})</p>
-                </div>
-                <div class="emotions-container">
-                    <h4>Emotions:</h4>
-                    ${emotionBars}
-                </div>
-            </div>
-        `;
+        // Calculate emotions based on polarity
+        const emotions = {
+            happy: Math.max(0, polarity),
+            sad: Math.max(0, -polarity)
+        };
+        
+        displayTextResults({
+            polarity: polarity,
+            subjectivity: subjectivity,
+            emotions: emotions
+        });
     } catch (error) {
-        document.getElementById('textResult').innerHTML = `<p class="error">Error analyzing text: ${error.message}</p>`;
+        showError('textResult', 'Error analyzing text. Please try again.');
     }
 }
 
@@ -61,7 +32,7 @@ async function analyzeText() {
 async function analyzeMovie() {
     const movieName = document.getElementById('movieInput').value;
     if (!movieName) {
-        alert('Please enter a movie name');
+        showError('movieResult', 'Please enter a movie name');
         return;
     }
 
@@ -71,117 +42,187 @@ async function analyzeMovie() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ movie: movieName }),
+            body: JSON.stringify({ movie: movieName })
         });
-
-        const data = await response.json();
-        const resultDiv = document.getElementById('movieResult');
         
+        const data = await response.json();
         if (data.error) {
-            resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+            showError('movieResult', data.error);
             return;
         }
-
-        resultDiv.innerHTML = `
-            <div class="result-container">
-                <h4>Movie Analysis Results:</h4>
-                <div class="movie-info">
-                    <p><strong>Title:</strong> ${data.movie}</p>
-                    <p><strong>Rating:</strong> ${data.rating.toFixed(1)}/10</p>
-                    <p><strong>Origin:</strong> ${data.is_indian ? 'Indian Movie' : 'International Movie'}</p>
-                    <div class="plot-summary">
-                        <h5>Plot Summary:</h5>
-                        <p>${data.plot}</p>
-                    </div>
-                </div>
-            </div>
-        `;
+        
+        displayMovieResults(data);
     } catch (error) {
-        document.getElementById('movieResult').innerHTML = `<p class="error">Error analyzing movie: ${error.message}</p>`;
+        showError('movieResult', 'Error analyzing movie. Please try again.');
     }
 }
 
 // Image Analysis Function
 async function analyzeImage() {
     const fileInput = document.getElementById('imageInput');
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        alert('Please select an image file');
+    if (!fileInput.files[0]) {
+        showError('imageResult', 'Please select an image');
         return;
     }
 
     try {
-        const base64Image = await convertToBase64(file);
-        const response = await fetch('/analyze-image', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ image: base64Image }),
-        });
-
-        const data = await response.json();
-        const resultDiv = document.getElementById('imageResult');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
         
-        if (data.error) {
-            resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
-            return;
-        }
-
-        // Display image preview
-        const imagePreview = document.createElement('img');
-        imagePreview.src = base64Image;
-        imagePreview.style.maxWidth = '100%';
-        imagePreview.style.marginBottom = '20px';
-
-        // Create face analysis results
-        const faceResults = data.face_analysis.map((face, index) => `
-            <div class="face-analysis">
-                <h5>Face ${face.face_number}:</h5>
-                <p><strong>Expression:</strong> ${face.expression}</p>
-                <p><strong>Confidence:</strong> ${(face.confidence * 100).toFixed(1)}%</p>
-            </div>
-        `).join('');
-
-        resultDiv.innerHTML = `
-            <div class="result-container">
-                <h4>Image Analysis Results:</h4>
-                <div class="image-preview">${imagePreview.outerHTML}</div>
-                <div class="analysis-summary">
-                    <p><strong>Total Faces Detected:</strong> ${data.image_info.faces_detected}</p>
-                    <div class="face-results">
-                        ${faceResults}
-                    </div>
-                </div>
-            </div>
-        `;
+        reader.onload = async function(e) {
+            const base64Image = e.target.result.split(',')[1];
+            
+            // Using Google Cloud Vision API (you'll need to set up a project and get an API key)
+            const apiKey = 'YOUR_CLOUD_VISION_API_KEY'; // Replace with your API key
+            const response = await fetch('https://vision.googleapis.com/v1/images:annotate?key=' + apiKey, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    requests: [{
+                        image: {
+                            content: base64Image
+                        },
+                        features: [{
+                            type: 'FACE_DETECTION',
+                            maxResults: 10
+                        }]
+                    }]
+                })
+            });
+            
+            const data = await response.json();
+            displayImageResults(data);
+        };
+        
+        reader.readAsDataURL(file);
     } catch (error) {
-        document.getElementById('imageResult').innerHTML = `<p class="error">Error analyzing image: ${error.message}</p>`;
+        showError('imageResult', 'Error analyzing image. Please try again.');
     }
 }
 
-// Helper Functions
-function convertToBase64(file) {
-    return new Promise((resolve, reject) => {
+// Helper functions
+function showError(elementId, message) {
+    const element = document.getElementById(elementId);
+    element.innerHTML = `
+        <div class="error">
+            <h3>Error</h3>
+            <p>${message}</p>
+        </div>
+    `;
+}
+
+function displayTextResults(data) {
+    const resultDiv = document.getElementById('textResult');
+    resultDiv.innerHTML = `
+        <div class="result-container">
+            <h4>Analysis Results</h4>
+            <div class="sentiment-info">
+                <p>Polarity: ${data.polarity.toFixed(2)}</p>
+                <p>Subjectivity: ${data.subjectivity.toFixed(2)}</p>
+            </div>
+            <div class="emotion-bar">
+                <span class="emotion-label">Happy</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${data.emotions.happy * 100}%"></div>
+                </div>
+                <span class="emotion-value">${(data.emotions.happy * 100).toFixed(1)}%</span>
+            </div>
+            <div class="emotion-bar">
+                <span class="emotion-label">Sad</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${data.emotions.sad * 100}%"></div>
+                </div>
+                <span class="emotion-value">${(data.emotions.sad * 100).toFixed(1)}%</span>
+            </div>
+        </div>
+    `;
+}
+
+function displayMovieResults(data) {
+    const resultDiv = document.getElementById('movieResult');
+    resultDiv.innerHTML = `
+        <div class="result-container">
+            <h4>${data.movie}</h4>
+            <div class="movie-info">
+                <p><strong>Rating:</strong> ${data.rating.toFixed(1)}/10</p>
+                <p><strong>Origin:</strong> ${data.is_indian ? 'Indian Movie' : 'International Movie'}</p>
+            </div>
+            <div class="plot-summary">
+                <h5>Plot Summary</h5>
+                <p>${data.plot}</p>
+            </div>
+        </div>
+    `;
+}
+
+function displayImageResults(data) {
+    const resultDiv = document.getElementById('imageResult');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    if (data.responses[0].faceAnnotations) {
+        const faces = data.responses[0].faceAnnotations;
+        let html = `
+            <div class="result-container">
+                <h4>Face Analysis Results</h4>
+                <div class="image-preview">
+                    <img src="${imagePreview.src}" alt="Uploaded Image">
+                </div>
+                <div class="face-results">
+                    <p>Total Faces Detected: ${faces.length}</p>
+        `;
+        
+        faces.forEach((face, index) => {
+            const emotions = getEmotionsFromFace(face);
+            html += `
+                <div class="face-analysis">
+                    <h5>Face ${index + 1}</h5>
+                    <p>Joy: ${(emotions.joy * 100).toFixed(1)}%</p>
+                    <p>Sorrow: ${(emotions.sorrow * 100).toFixed(1)}%</p>
+                    <p>Anger: ${(emotions.anger * 100).toFixed(1)}%</p>
+                    <p>Surprise: ${(emotions.surprise * 100).toFixed(1)}%</p>
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+        resultDiv.innerHTML = html;
+    } else {
+        showError('imageResult', 'No faces detected in the image');
+    }
+}
+
+function getEmotionsFromFace(face) {
+    return {
+        joy: face.joyLikelihood === 'VERY_LIKELY' ? 1 : 
+             face.joyLikelihood === 'LIKELY' ? 0.75 :
+             face.joyLikelihood === 'POSSIBLE' ? 0.5 :
+             face.joyLikelihood === 'UNLIKELY' ? 0.25 : 0,
+        sorrow: face.sorrowLikelihood === 'VERY_LIKELY' ? 1 :
+                face.sorrowLikelihood === 'LIKELY' ? 0.75 :
+                face.sorrowLikelihood === 'POSSIBLE' ? 0.5 :
+                face.sorrowLikelihood === 'UNLIKELY' ? 0.25 : 0,
+        anger: face.angerLikelihood === 'VERY_LIKELY' ? 1 :
+               face.angerLikelihood === 'LIKELY' ? 0.75 :
+               face.angerLikelihood === 'POSSIBLE' ? 0.5 :
+               face.angerLikelihood === 'UNLIKELY' ? 0.25 : 0,
+        surprise: face.surpriseLikelihood === 'VERY_LIKELY' ? 1 :
+                 face.surpriseLikelihood === 'LIKELY' ? 0.75 :
+                 face.surpriseLikelihood === 'POSSIBLE' ? 0.5 :
+                 face.surpriseLikelihood === 'UNLIKELY' ? 0.25 : 0
+    };
+}
+
+// Image preview function
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
         const reader = new FileReader();
+        reader.onload = function(e) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-function getPolarityLabel(polarity) {
-    if (polarity > 0.5) return 'Very Positive';
-    if (polarity > 0) return 'Positive';
-    if (polarity < -0.5) return 'Very Negative';
-    if (polarity < 0) return 'Negative';
-    return 'Neutral';
-}
-
-function getSubjectivityLabel(subjectivity) {
-    if (subjectivity > 0.75) return 'Very Subjective';
-    if (subjectivity > 0.5) return 'Subjective';
-    if (subjectivity > 0.25) return 'Somewhat Subjective';
-    return 'Objective';
+    }
 }

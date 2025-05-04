@@ -57,6 +57,9 @@ def analyze_movie():
             f"{movie_name} (India)",  # Add India to search
             f"{movie_name} (Bollywood)",  # Add Bollywood to search
             f"{movie_name} (Hindi)",  # Add Hindi to search
+            f"{movie_name} (Telugu)",  # Add Telugu to search
+            f"{movie_name} (Tamil)",  # Add Tamil to search
+            f"{movie_name} (2022)",  # Add year for recent movies
         ]
         
         movies = []
