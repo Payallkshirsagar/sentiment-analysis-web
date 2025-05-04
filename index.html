@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis Hub</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #a8a8a8;
+            margin-bottom: 20px;
+        }
+
+        .project-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .project-info h2 {
+            color: #e94560;
+            margin-top: 0;
+        }
+
+        .analysis-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .analysis-section h2 {
+            color: #e94560;
+            margin-top: 0;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #ff6b6b;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            color: #e94560;
+            margin-top: 0;
+        }
+
+        .feature-card p {
+            color: #a8a8a8;
+        }
+
+        .result-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-container h4 {
+            color: #e94560;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .emotion-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .emotion-label {
+            width: 100px;
+            color: #333;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            background: #e94560;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .emotion-value {
+            width: 60px;
+            text-align: right;
+            color: #666;
+        }
+
+        .sentiment-info {
+            margin-bottom: 20px;
+        }
+
+        .sentiment-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .movie-info {
+            color: #333;
+        }
+
+        .movie-info p {
+            margin: 5px 0;
+        }
+
+        .plot-summary {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 5px;
+        }
+
+        .plot-summary h5 {
+            color: #e94560;
+            margin-top: 0;
+        }
+
+        .plot-summary p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .face-analysis {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .face-analysis h5 {
+            color: #e94560;
+            margin-top: 0;
+        }
+
+        .face-analysis p {
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .error {
+            color: #ff6b6b;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .image-preview {
+            margin-bottom: 20px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .analysis-summary {
+            color: #333;
+        }
+
+        .analysis-summary p {
+            margin: 5px 0;
+        }
+
+        .face-results {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sentiment Analysis Hub</h1>
+            <p class="subtitle">Analyze emotions in text, movies, and images</p>
+        </header>
+
+        <div class="project-info">
+            <h2>About This Project</h2>
+            <p>Welcome to Sentiment Analysis Hub, a comprehensive tool that helps you understand emotions and sentiments across different media types. Our platform offers three powerful analysis features:</p>
+            <ul>
+                <li><strong>Text Analysis:</strong> Analyze the sentiment and emotions in any text input</li>
+                <li><strong>Movie Analysis:</strong> Get insights about movies including ratings and plot summaries</li>
+                <li><strong>Image Analysis:</strong> Detect emotions in images through facial expression analysis</li>
+            </ul>
+            <p>This project combines advanced natural language processing and computer vision techniques to provide accurate sentiment analysis results.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Text Analysis</h3>
+                <p>Enter any text to analyze its sentiment and emotional content. Perfect for understanding customer feedback, social media posts, or any written content.</p>
+                <textarea id="textInput" placeholder="Enter text to analyze..."></textarea>
+                <button onclick="analyzeText()">Analyze Text</button>
+                <div id="textResult"></div>
+            </div>
+
+            <div class="feature-card">
+                <h3>Movie Analysis</h3>
+                <p>Search for any movie to get detailed information including ratings, plot summaries, and more. Great for movie enthusiasts and researchers.</p>
+                <input type="text" id="movieInput" placeholder="Enter movie name...">
+                <button onclick="analyzeMovie()">Analyze Movie</button>
+                <div id="movieResult"></div>
+            </div>
+
+            <div class="feature-card">
+                <h3>Image Analysis</h3>
+                <p>Upload an image to detect faces and analyze emotions. Uses advanced computer vision to identify facial expressions and emotional states.</p>
+                <input type="file" id="imageInput" accept="image/*">
+                <button onclick="analyzeImage()">Analyze Image</button>
+                <div id="imageResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text Sentiment Analysis</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>Text Sentiment Analysis</h2>
+    <textarea id="text-input" rows="6" placeholder="Enter text to analyze..."></textarea>
+    <button onclick="analyzeText()">Analyze</button>
+
+    <div id="result" class="result"></div>
+    <a href="/">Go Back</a>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

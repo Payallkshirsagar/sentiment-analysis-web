@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IMDb Movie Sentiment</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>IMDb Review Sentiment</h2>
+    <input type="text" id="movie-input" placeholder="Enter movie name...">
+    <button onclick="analyzeMovie()">Analyze</button>
+
+    <div id="movie-result" class="result"></div>
+    <a href="/">Go Back</a>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

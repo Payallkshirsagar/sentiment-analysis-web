@@ -1,0 +1,11 @@
+flask
+flask-cors
+textblob
+text2emotion
+IMDbPY
+fer
+pillow
+opencv-python
+numpy
+moviepy
+
