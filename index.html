@@ -255,6 +255,132 @@
         .face-results {
             margin-top: 15px;
         }
+
+        /* Responsive Design Improvements */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-section {
+                padding: 15px;
+            }
+
+            textarea, input {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            button {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .emotion-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .emotion-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .bar-container {
+                width: 100%;
+                margin: 0;
+            }
+
+            .emotion-value {
+                width: 100%;
+                text-align: left;
+                margin-top: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .project-info {
+                padding: 15px;
+            }
+
+            .result-container {
+                padding: 15px;
+            }
+
+            .face-analysis {
+                padding: 10px;
+            }
+
+            .plot-summary {
+                padding: 8px;
+            }
+        }
+
+        /* Mobile Navigation */
+        .mobile-menu {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 10px;
+                display: flex;
+                justify-content: space-around;
+                backdrop-filter: blur(10px);
+            }
+
+            .mobile-menu button {
+                background: none;
+                border: none;
+                color: #fff;
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .mobile-menu button:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .container {
+                padding-bottom: 60px; /* Space for mobile menu */
+            }
+        }
     </style>
 </head>
 <body>
@@ -302,6 +428,18 @@
         </div>
     </div>
 
+    <!-- Add mobile navigation -->
+    <div class="mobile-menu">
+        <button onclick="scrollToSection('text-analysis')">Text</button>
+        <button onclick="scrollToSection('movie-analysis')">Movie</button>
+        <button onclick="scrollToSection('image-analysis')">Image</button>
+    </div>
+
     <script src="script.js"></script>
+    <script>
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
