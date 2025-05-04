@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentiment Analysis Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/textblob@1.0.0/dist/TextBlob.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -210,15 +211,15 @@
         }
 
         .face-analysis {
-            background: #f8f8f8;
+            background: rgba(255, 255, 255, 0.05);
             padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
         }
 
         .face-analysis h5 {
             color: #e94560;
-            margin-top: 0;
+            margin: 0 0 10px 0;
         }
 
         .face-analysis p {
@@ -235,21 +236,24 @@
         }
 
         .image-preview {
-            margin-bottom: 20px;
+            margin: 15px 0;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .image-preview img {
             max-width: 100%;
-            border-radius: 5px;
+            border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .analysis-summary {
-            color: #333;
-        }
-
-        .analysis-summary p {
-            margin: 5px 0;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
         }
 
         .face-results {
@@ -381,6 +385,13 @@
                 padding-bottom: 60px; /* Space for mobile menu */
             }
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #e94560;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -421,7 +432,8 @@
             <div class="feature-card">
                 <h3>Image Analysis</h3>
                 <p>Upload an image to detect faces and analyze emotions. Uses advanced computer vision to identify facial expressions and emotional states.</p>
-                <input type="file" id="imageInput" accept="image/*">
+                <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+                <div id="imagePreview" class="image-preview"></div>
                 <button onclick="analyzeImage()">Analyze Image</button>
                 <div id="imageResult"></div>
             </div>

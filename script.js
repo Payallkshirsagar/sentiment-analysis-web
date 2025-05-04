@@ -60,40 +60,48 @@ async function analyzeMovie() {
 // Image Analysis Function
 async function analyzeImage() {
     const fileInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    
     if (!fileInput.files[0]) {
         showError('imageResult', 'Please select an image');
         return;
     }
 
     try {
+        // Show loading state
+        const resultDiv = document.getElementById('imageResult');
+        resultDiv.innerHTML = '<div class="loading">Analyzing image...</div>';
+
         const file = fileInput.files[0];
         const reader = new FileReader();
         
         reader.onload = async function(e) {
-            const base64Image = e.target.result.split(',')[1];
-            
-            // Using Google Cloud Vision API (you'll need to set up a project and get an API key)
-            const apiKey = 'YOUR_CLOUD_VISION_API_KEY'; // Replace with your API key
-            const response = await fetch('https://vision.googleapis.com/v1/images:annotate?key=' + apiKey, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    requests: [{
-                        image: {
-                            content: base64Image
-                        },
-                        features: [{
-                            type: 'FACE_DETECTION',
-                            maxResults: 10
-                        }]
-                    }]
-                })
-            });
-            
-            const data = await response.json();
-            displayImageResults(data);
+            try {
+                const base64Image = e.target.result;
+                
+                const response = await fetch('/analyze-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: base64Image })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError('imageResult', data.error);
+                    return;
+                }
+                
+                displayImageResults(data);
+            } catch (error) {
+                showError('imageResult', 'Error processing image. Please try again.');
+            }
+        };
+        
+        reader.onerror = function() {
+            showError('imageResult', 'Error reading image file. Please try again.');
         };
         
         reader.readAsDataURL(file);
@@ -159,70 +167,51 @@ function displayMovieResults(data) {
 
 function displayImageResults(data) {
     const resultDiv = document.getElementById('imageResult');
-    const imagePreview = document.getElementById('imagePreview');
+    const imagePreview = document.getElementById('imagePreview').querySelector('img');
     
-    if (data.responses[0].faceAnnotations) {
-        const faces = data.responses[0].faceAnnotations;
-        let html = `
-            <div class="result-container">
-                <h4>Face Analysis Results</h4>
-                <div class="image-preview">
-                    <img src="${imagePreview.src}" alt="Uploaded Image">
-                </div>
-                <div class="face-results">
-                    <p>Total Faces Detected: ${faces.length}</p>
-        `;
-        
-        faces.forEach((face, index) => {
-            const emotions = getEmotionsFromFace(face);
+    let html = `
+        <div class="result-container">
+            <h4>Face Analysis Results</h4>
+            <div class="analysis-summary">
+                <p>Total Faces Detected: ${data.image_info.faces_detected}</p>
+            </div>
+    `;
+    
+    if (data.face_analysis && data.face_analysis.length > 0) {
+        data.face_analysis.forEach(face => {
             html += `
                 <div class="face-analysis">
-                    <h5>Face ${index + 1}</h5>
-                    <p>Joy: ${(emotions.joy * 100).toFixed(1)}%</p>
-                    <p>Sorrow: ${(emotions.sorrow * 100).toFixed(1)}%</p>
-                    <p>Anger: ${(emotions.anger * 100).toFixed(1)}%</p>
-                    <p>Surprise: ${(emotions.surprise * 100).toFixed(1)}%</p>
+                    <h5>Face ${face.face_number}</h5>
+                    <div class="emotion-bar">
+                        <span class="emotion-label">Expression</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: ${face.confidence * 100}%"></div>
+                        </div>
+                        <span class="emotion-value">${face.expression} (${(face.confidence * 100).toFixed(1)}%)</span>
+                    </div>
                 </div>
             `;
         });
-        
-        html += '</div></div>';
-        resultDiv.innerHTML = html;
-    } else {
-        showError('imageResult', 'No faces detected in the image');
     }
-}
-
-function getEmotionsFromFace(face) {
-    return {
-        joy: face.joyLikelihood === 'VERY_LIKELY' ? 1 : 
-             face.joyLikelihood === 'LIKELY' ? 0.75 :
-             face.joyLikelihood === 'POSSIBLE' ? 0.5 :
-             face.joyLikelihood === 'UNLIKELY' ? 0.25 : 0,
-        sorrow: face.sorrowLikelihood === 'VERY_LIKELY' ? 1 :
-                face.sorrowLikelihood === 'LIKELY' ? 0.75 :
-                face.sorrowLikelihood === 'POSSIBLE' ? 0.5 :
-                face.sorrowLikelihood === 'UNLIKELY' ? 0.25 : 0,
-        anger: face.angerLikelihood === 'VERY_LIKELY' ? 1 :
-               face.angerLikelihood === 'LIKELY' ? 0.75 :
-               face.angerLikelihood === 'POSSIBLE' ? 0.5 :
-               face.angerLikelihood === 'UNLIKELY' ? 0.25 : 0,
-        surprise: face.surpriseLikelihood === 'VERY_LIKELY' ? 1 :
-                 face.surpriseLikelihood === 'LIKELY' ? 0.75 :
-                 face.surpriseLikelihood === 'POSSIBLE' ? 0.5 :
-                 face.surpriseLikelihood === 'UNLIKELY' ? 0.25 : 0
-    };
+    
+    html += '</div>';
+    resultDiv.innerHTML = html;
 }
 
 // Image preview function
 function previewImage(event) {
     const file = event.target.files[0];
+    const imagePreview = document.getElementById('imagePreview');
+    
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const imagePreview = document.getElementById('imagePreview');
-            imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            imagePreview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">
+            `;
         };
         reader.readAsDataURL(file);
+    } else {
+        imagePreview.innerHTML = '';
     }
 }
