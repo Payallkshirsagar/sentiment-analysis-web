@@ -80,7 +80,7 @@ def analyze_movie():
         movie_id = movie.movieID
         movie = ia.get_movie(movie_id)
         
-        # Get movie details
+        # Get movie details with proper error handling
         title = movie.get('title', movie_name)
         countries = movie.get('countries', ['Unknown'])
         
@@ -104,12 +104,15 @@ def analyze_movie():
         
         print(f"Movie details - Title: {title}, Rating: {rating}, Indian: {is_indian}")  # Debug log
         
-        return jsonify({
+        # Create response data
+        response_data = {
             'movie': title,
             'is_indian': is_indian,
             'rating': float(rating),
             'plot': plot
-        })
+        }
+        
+        return jsonify(response_data)
         
     except Exception as e:
         print(f"Error analyzing movie: {str(e)}")  # Debug log

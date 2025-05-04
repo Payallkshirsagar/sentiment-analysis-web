@@ -37,6 +37,10 @@ async function analyzeMovie() {
     }
 
     try {
+        // Show loading state
+        const resultDiv = document.getElementById('movieResult');
+        resultDiv.innerHTML = '<div class="loading">Analyzing movie...</div>';
+
         const response = await fetch('/analyze-movie', {
             method: 'POST',
             headers: {
@@ -46,6 +50,11 @@ async function analyzeMovie() {
         });
         
         const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to analyze movie');
+        }
+        
         if (data.error) {
             showError('movieResult', data.error);
             return;
@@ -53,7 +62,7 @@ async function analyzeMovie() {
         
         displayMovieResults(data);
     } catch (error) {
-        showError('movieResult', 'Error analyzing movie. Please try again.');
+        showError('movieResult', error.message || 'Error analyzing movie. Please try again.');
     }
 }
 
