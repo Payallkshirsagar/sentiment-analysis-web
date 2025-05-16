@@ -7,21 +7,25 @@ async function analyzeText() {
     }
 
     try {
-        // Simple sentiment analysis using TextBlob.js
-        const blob = new TextBlob(text);
-        const polarity = blob.sentiment.polarity;
-        const subjectivity = blob.sentiment.subjectivity;
-        
-        // Calculate emotions based on polarity
-        const emotions = {
-            happy: Math.max(0, polarity),
-            sad: Math.max(0, -polarity)
-        };
-        
+        const response = await fetch('/analyze-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: text })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            showError('textResult', data.error);
+            return;
+        }
+
         displayTextResults({
-            polarity: polarity,
-            subjectivity: subjectivity,
-            emotions: emotions
+            polarity: data.polarity,
+            subjectivity: data.subjectivity,
+            emotions: data.emotions
         });
     } catch (error) {
         showError('textResult', 'Error analyzing text. Please try again.');
