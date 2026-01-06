@@ -39,7 +39,9 @@ A comprehensive web application that provides sentiment analysis for text, movie
    - Local: http://localhost:5000
    - Network: http://your-ip:5000
 
-## Usage
+## Screenshot
+<img width="1920" height="884" alt="image" src="https://github.com/user-attachments/assets/f0ab3327-8bab-46e9-81f7-50722d8b8b17" />
+
 
 ### Text Analysis
 1. Enter text in the text input field
